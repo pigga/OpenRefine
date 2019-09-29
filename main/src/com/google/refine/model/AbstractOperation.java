@@ -35,6 +35,7 @@ package com.google.refine.model;
 
 import java.util.Properties;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.annotation.JsonTypeIdResolver;
@@ -51,7 +52,8 @@ import com.google.refine.process.QuickHistoryEntryProcess;
 @JsonTypeInfo(
         use=JsonTypeInfo.Id.CUSTOM,
         include=JsonTypeInfo.As.PROPERTY,
-        property="op")
+        property="op",
+        visible=true) // for UnknownOperation, which needs to read its own id
 @JsonTypeIdResolver(OperationResolver.class)
 abstract public class AbstractOperation  {
     public Process createProcess(Project project, Properties options) throws Exception {
@@ -71,7 +73,7 @@ abstract public class AbstractOperation  {
         throw new UnsupportedOperationException();
     }
     
-    @JsonProperty("op")
+    @JsonIgnore // the operation id is already added as "op" by the JsonTypeInfo annotation
     public String getOperationId() {
         return OperationRegistry.s_opClassToName.get(this.getClass());
     }

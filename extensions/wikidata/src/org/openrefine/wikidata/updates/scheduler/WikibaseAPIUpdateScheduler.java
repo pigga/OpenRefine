@@ -36,7 +36,7 @@ import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue;
 import org.wikidata.wdtk.datamodel.interfaces.Statement;
 
 /**
- * A simple scheduler for batches commited via the Wikibase API.
+ * A simple scheduler for batches committed via the Wikibase API.
  * 
  * The strategy is quite simple and makes at most two edits per touched item
  * (which is not minimal though). Each update is split between statements making
@@ -98,8 +98,12 @@ public class WikibaseAPIUpdateScheduler implements UpdateScheduler {
      * @param update
      */
     protected void splitUpdate(ItemUpdate update) {
-        ItemUpdateBuilder pointerFreeBuilder = new ItemUpdateBuilder(update.getItemId()).addLabels(update.getLabels())
-                .addDescriptions(update.getDescriptions()).addAliases(update.getAliases())
+        ItemUpdateBuilder pointerFreeBuilder = new ItemUpdateBuilder(update.getItemId())
+        		.addLabels(update.getLabels(), true)
+        		.addLabels(update.getLabelsIfNew(), false)
+                .addDescriptions(update.getDescriptions(), true)
+                .addDescriptions(update.getDescriptionsIfNew(), false)
+                .addAliases(update.getAliases())
                 .deleteStatements(update.getDeletedStatements());
         ItemUpdateBuilder pointerFullBuilder = new ItemUpdateBuilder(update.getItemId());
 

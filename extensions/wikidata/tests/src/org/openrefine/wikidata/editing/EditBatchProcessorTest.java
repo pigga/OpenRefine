@@ -23,11 +23,11 @@
  ******************************************************************************/
 package org.openrefine.wikidata.editing;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -37,6 +37,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.openrefine.wikidata.testing.TestingData;
+import org.openrefine.wikidata.testing.WikidataRefineTest;
 import org.openrefine.wikidata.updates.ItemUpdate;
 import org.openrefine.wikidata.updates.ItemUpdateBuilder;
 import org.testng.annotations.BeforeMethod;
@@ -51,9 +52,7 @@ import org.wikidata.wdtk.wikibaseapi.WikibaseDataEditor;
 import org.wikidata.wdtk.wikibaseapi.WikibaseDataFetcher;
 import org.wikidata.wdtk.wikibaseapi.apierrors.MediaWikiApiErrorException;
 
-import com.google.refine.tests.RefineTest;
-
-public class EditBatchProcessorTest extends RefineTest {
+public class EditBatchProcessorTest extends WikidataRefineTest {
 
     private WikibaseDataFetcher fetcher = null;
     private WikibaseDataEditor editor = null;
@@ -120,7 +119,7 @@ public class EditBatchProcessorTest extends RefineTest {
         List<ItemIdValue> qids = ids.stream().map(e -> Datamodel.makeWikidataItemIdValue(e))
                 .collect(Collectors.toList());
         List<ItemUpdate> batch = qids.stream()
-                .map(qid -> new ItemUpdateBuilder(qid).addDescription(description).build())
+                .map(qid -> new ItemUpdateBuilder(qid).addDescription(description, true).build())
                 .collect(Collectors.toList());
 
         int batchSize = 50;

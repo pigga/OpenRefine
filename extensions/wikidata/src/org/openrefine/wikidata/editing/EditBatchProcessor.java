@@ -91,6 +91,11 @@ public class EditBatchProcessor {
         this.editor = editor;
         editor.setEditAsBot(true); // this will not do anything if the user does not
         // have a bot flag, and this is generally wanted if they have one.
+
+        // edit at 60 edits/min by default. If Wikidata is overloaded
+        // it will slow us down via the maxlag mechanism.
+        editor.setAverageTimePerEdit(1000);
+
         this.library = library;
         this.summary = summary;
         this.batchSize = batchSize;
@@ -142,8 +147,15 @@ public class EditBatchProcessor {
             } else {
                 // Existing item
                 ItemDocument currentDocument = (ItemDocument) currentDocs.get(update.getItemId().getId());
-                editor.updateTermsStatements(currentDocument, update.getLabels().stream().collect(Collectors.toList()),
-                        update.getDescriptions().stream().collect(Collectors.toList()),
+                List<MonolingualTextValue> labels = update.getLabels().stream().collect(Collectors.toList());
+                labels.addAll(update.getLabelsIfNew().stream()
+                      .filter(label -> !currentDocument.getLabels().containsKey(label.getLanguageCode())).collect(Collectors.toList()));
+                List<MonolingualTextValue> descriptions = update.getDescriptions().stream().collect(Collectors.toList());
+                descriptions.addAll(update.getDescriptionsIfNew().stream()
+                        .filter(desc -> !currentDocument.getDescriptions().containsKey(desc.getLanguageCode())).collect(Collectors.toList()));
+                editor.updateTermsStatements(currentDocument,
+                		labels,
+                        descriptions,
                         update.getAliases().stream().collect(Collectors.toList()),
                         new ArrayList<MonolingualTextValue>(),
                         update.getAddedStatements().stream().collect(Collectors.toList()),
@@ -199,7 +211,10 @@ public class EditBatchProcessor {
             } catch (MediaWikiApiErrorException e) {
                 e.printStackTrace();
                 Thread.sleep(5000);
-            }
+            } catch (IOException e) {
+				e.printStackTrace();
+				Thread.sleep(5000);
+			}
             retries--;
         }
         if (currentDocs == null) {
